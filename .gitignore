@@ -1,3 +1,4 @@
 *.csv
 *.db
 *.db.wal
+__pycache__

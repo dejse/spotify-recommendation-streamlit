@@ -11,7 +11,7 @@ from sklearn.pipeline import Pipeline
 from sklearn.preprocessing import MinMaxScaler
 from sklearn.neighbors import NearestNeighbors
 
-data_path = Path("../data")
+data_path = Path("./data")
 data_path_string = data_path.resolve().as_posix()
 con = duckdb.connect(database=f"{data_path}/spotify.db")
 
