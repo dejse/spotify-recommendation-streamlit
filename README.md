@@ -9,3 +9,9 @@ conda create -n spotify_env python=3.11
 conda activate spotify_env
 python -m pip install -r requirements.txt
 ```
+
+## Run
+
+```sh
+python -m streamlit run app.py
+```
