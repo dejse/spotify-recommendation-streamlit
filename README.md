@@ -7,7 +7,7 @@ Project for MS in DS
 ```sh
 conda create -n spotify_env python=3.11
 conda activate spotify_env
-python -m pip install -r requirements.txt
+python -m pip install streamlit duckdb pandas scikit-learn
 ```
 
 ## Run
