@@ -7,8 +7,7 @@ import duckdb
 import utils
 
 # Setup
-data_path = Path("data")
-data_path_string = data_path.resolve().as_posix()
+data_path = "./data"
 
 @st.cache_resource
 def get_db():
@@ -40,7 +39,14 @@ except:
 
 
 # Main
-st.title("Spotify Song Recommender")
-recommendations = utils.make_recommendations(con,id)
-st.dataframe(recommendations)
+st.markdown("# Spotify Song Recommender")
 
+st.markdown("## Song Details")
+st.markdown("Here are the details of the song you selected:")
+st.table(utils.show_song_details(con, id))
+
+st.markdown("## Recommendations")
+recommendations = utils.make_recommendations(con,id)
+st.table(recommendations)
+
+st.bar_chart(data = recommendations, x="song_detail", y="distances")

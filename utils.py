@@ -8,8 +8,7 @@ from sklearn.preprocessing import MinMaxScaler
 from sklearn.preprocessing import LabelEncoder
 from sklearn.neighbors import KNeighborsClassifier
 
-data_path = Path("data")
-data_path_string = data_path.resolve().as_posix()
+data_path = "./data"
 
 def clean_db(con: duckdb.DuckDBPyConnection):
     con.execute("drop table if exists albums")
@@ -19,10 +18,11 @@ def clean_db(con: duckdb.DuckDBPyConnection):
     con.execute("drop table if exists features")
     con.execute("drop table if exists features_preprocessed")
 
-def load_data_into_db(con: duckdb.DuckDBPyConnection, data_path_string: str):
-    con.read_csv(f"{data_path_string}/spotify_albums.csv", all_varchar=False).create("albums")
-    con.read_csv(f"{data_path_string}/spotify_artists.csv", all_varchar=False).create("artists")
-    con.read_csv(f"{data_path_string}/spotify_tracks.csv", all_varchar=False).create("tracks")
+
+def load_data_into_db(con: duckdb.DuckDBPyConnection):
+    con.read_csv(f"{data_path}/spotify_albums.csv", all_varchar=False).create("albums")
+    con.read_csv(f"{data_path}/spotify_artists.csv", all_varchar=False).create("artists")
+    con.read_csv(f"{data_path}/spotify_tracks.csv", all_varchar=False).create("tracks")
 
 
 def create_genre_table(con: duckdb.DuckDBPyConnection):
@@ -98,7 +98,7 @@ def create_features_table(con: duckdb.DuckDBPyConnection):
         )
         select *, row_number() over (order by id) -1 as row_number
         from final
-        where genre_class != 'Other'
+        --where genre_class != 'Other'
     """)
 
 
@@ -134,8 +134,8 @@ def create_features_processed_table(con: duckdb.DuckDBPyConnection):
 
 def get_model_knn() -> KNeighborsClassifier:
     # Check if model exists
-    if Path("data/knn.pkl").exists():
-        with open(Path("data/knn.pkl"), "rb") as f:
+    if Path(f"{data_path}/knn.pkl").exists():
+        with open(Path(f"{data_path}/knn.pkl"), "rb") as f:
             return pickle.load(f)
 
     # Otherwise, create model
@@ -146,7 +146,7 @@ def get_model_knn() -> KNeighborsClassifier:
     knn = KNeighborsClassifier(n_neighbors=5, algorithm="ball_tree")
     knn.fit(X,y)
     
-    with open(Path("./data/knn.pkl") / "knn.pkl", "wb") as f:
+    with open(Path(f"{data_path}/knn.pkl"), "wb") as f:
         pickle.dump(knn, f)
 
     return knn
@@ -171,7 +171,7 @@ def show_song_details(con: duckdb.DuckDBPyConnection, track_id: str) -> str:
     return con.execute(sql, { "track_id": track_id}).fetch_df()
 
 
-def make_recommendations(con: duckdb.DuckDBPyConnection, track_id: str, n_neighbors: int = 300) -> pd.DataFrame:
+def make_recommendations(con: duckdb.DuckDBPyConnection, track_id: str, n_neighbors: int = 2000) -> pd.DataFrame:
     # Get test data
     sql = """select * from features_preprocessed where id = $track_id order by id"""
     df_test = con.execute(sql, { "track_id": track_id}).fetch_df()
@@ -192,7 +192,7 @@ def make_recommendations(con: duckdb.DuckDBPyConnection, track_id: str, n_neighb
     merged = pd.merge(recommended, details, left_on="row_number", right_on="row_number")
     
     merged = merged.filter(
-        ["track_name", "artist_name", "album_name", "genres", "genre_class", "preview_url", "track_href"
+        ["song_detail", "genres", "genre_class", "preview_url", "track_href"
           "row_number", "distances",
          "acousticness", "danceability", "energy", "instrumentalness",
          "liveness", "loudness", "speechiness", "tempo", "valence"]
@@ -201,7 +201,6 @@ def make_recommendations(con: duckdb.DuckDBPyConnection, track_id: str, n_neighb
     genre = merged.iloc[0]["genre_class"]
     merged = merged.query("genre_class == @genre").head(10)
     return merged
-
 
 
 
