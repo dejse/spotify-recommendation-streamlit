@@ -88,8 +88,6 @@ def create_features_table(con: duckdb.DuckDBPyConnection):
                 t.name as track_name, ar.name as artist_name, a.name as album_name, concat(ar.name, ' - ', t.name) as song_detail
                 coalesce(g.genres, 'Other') as genres, 
                 coalesce(g.genre_class, 'Other') as genre_class,
-                t.preview_url, t.track_href, t.analysis_url,
-                
             from tracks t
             join albums a on t.album_id = a.id
             join artists ar on a.artist_id = ar.id
@@ -183,7 +181,7 @@ def make_recommendations(con: duckdb.DuckDBPyConnection, track_id: str, n_neighb
     distances, indices = knn.kneighbors(X_test, n_neighbors=n_neighbors)
 
     # Lookup song details
-    recommended = pd.DataFrame({"row_number": indices[0], "distances": distances[0]})
+    recommended = pd.DataFrame({"row_number": indices[0], "distance": distances[0]})
     sql = """
         select * from features
         where row_number in (select row_number from recommended)
@@ -192,8 +190,8 @@ def make_recommendations(con: duckdb.DuckDBPyConnection, track_id: str, n_neighb
     merged = pd.merge(recommended, details, left_on="row_number", right_on="row_number")
     
     merged = merged.filter(
-        ["song_detail", "genres", "genre_class", "preview_url", "track_href"
-          "row_number", "distances",
+        ["id", "song_detail", "genres", "genre_class",
+          "row_number", "distance",
          "acousticness", "danceability", "energy", "instrumentalness",
          "liveness", "loudness", "speechiness", "tempo", "valence"]
     )

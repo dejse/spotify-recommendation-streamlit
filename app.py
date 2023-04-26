@@ -43,10 +43,22 @@ st.markdown("# Spotify Song Recommender")
 
 st.markdown("## Song Details")
 st.markdown("Here are the details of the song you selected:")
-st.table(utils.show_song_details(con, id))
+st.dataframe(utils.show_song_details(con, id))
 
 st.markdown("## Recommendations")
 recommendations = utils.make_recommendations(con,id)
-st.table(recommendations)
+st.dataframe(recommendations)
 
-st.bar_chart(data = recommendations, x="song_detail", y="distances")
+
+try:
+    iframes = ""
+    track_ids = recommendations["id"].to_list()
+    for i in track_ids:
+        src = f"https://open.spotify.com/embed/track/{i}"
+        #iframes += f"""
+        #<iframe style="" src="https://open.spotify.com/embed/track/{i}" frameBorder="1" 
+        #    allowfullscreen="" allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture" loading="lazy"></iframe>
+        #"""
+        st.components.v1.iframe(src, width=180, height=90)
+except:
+    pass
