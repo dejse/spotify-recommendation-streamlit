@@ -33,9 +33,9 @@ try:
     query = st.sidebar.text_input("Search for a song or artist", "")
     songs = utils.lookup_song(con, query, selected_genre_class)
     selected_song = st.sidebar.selectbox("Select Song", songs["song_detail"])[:20]
-    id = songs.query("`song_detail`.str.contains(@selected_song)", engine="python").iloc[0]["id"]
+    track_id = songs.query("`song_detail`.str.contains(@selected_song)", engine="python").iloc[0]["id"]
 except:
-    id = ""
+    track_id = ""
 
 
 # Main
@@ -43,22 +43,18 @@ st.markdown("# Spotify Song Recommender")
 
 st.markdown("## Song Details")
 st.markdown("Here are the details of the song you selected:")
-st.dataframe(utils.show_song_details(con, id))
+st.dataframe(utils.show_song_details(con, track_id))
 
 st.markdown("## Recommendations")
-recommendations = utils.make_recommendations(con,id)
+recommendations = utils.make_recommendations(con, track_id)
 st.dataframe(recommendations)
 
 
 try:
     iframes = ""
     track_ids = recommendations["id"].to_list()
-    for i in track_ids:
-        src = f"https://open.spotify.com/embed/track/{i}"
-        #iframes += f"""
-        #<iframe style="" src="https://open.spotify.com/embed/track/{i}" frameBorder="1" 
-        #    allowfullscreen="" allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture" loading="lazy"></iframe>
-        #"""
+    for index, id in enumerate(track_ids):
+        src = f"https://open.spotify.com/embed/track/{id}"
         st.components.v1.iframe(src, width=180, height=90)
 except:
     pass
