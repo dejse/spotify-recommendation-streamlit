@@ -8,6 +8,7 @@ from sklearn.preprocessing import MinMaxScaler
 from sklearn.preprocessing import LabelEncoder
 from sklearn.neighbors import KNeighborsClassifier
 
+
 data_path = "./data"
 
 def clean_db(con: duckdb.DuckDBPyConnection):
