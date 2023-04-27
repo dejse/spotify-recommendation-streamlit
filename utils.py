@@ -150,16 +150,27 @@ def get_model_knn() -> KNeighborsClassifier:
     return knn
 
 
-def lookup_song(con: duckdb.DuckDBPyConnection, lookup_query: str = "", genre_class: str = "") -> pd.DataFrame:
+def get_genre_list(con: duckdb.DuckDBPyConnection) -> list[str]:
+    genres = con.query("""
+        select genre_class, count(genre_class) 
+        from features 
+        group by genre_class 
+        order by count(genre_class) desc
+    """).df()["genre_class"].to_list()
+    genres = [""] + genres
+    return genres
+
+
+def lookup_songs(con: duckdb.DuckDBPyConnection, lookup_query: str = "", genre_class: str = "") -> pd.DataFrame:
     sql = """
-      select *
-      from features
-      where 
-        regexp_matches(lower(song_detail), left($query, 50))
-        AND 
-        regexp_matches(lower(genre_class), $genre)
-      order by id
-      limit 30
+        select *
+        from features
+        where 
+          regexp_matches(lower(song_detail), left($query, 50))
+          AND 
+          regexp_matches(lower(genre_class), $genre)
+        order by id
+        limit 30
     """
     return con.execute(sql, { "query": lookup_query.lower(), "genre": genre_class.lower() }).fetch_df()
 

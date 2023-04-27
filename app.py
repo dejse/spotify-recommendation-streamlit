@@ -6,41 +6,34 @@ import pandas as pd
 import duckdb
 import utils
 
-# Setup
-data_path = "./data"
 
+### Setup
 @st.cache_resource
-def get_db():
+def get_db(data_path: str = "./data") -> duckdb.DuckDBPyConnection:
     return duckdb.connect(database=f"{data_path}/spotify.db")
 
 con = get_db()
 
 
-# Sidebar
-genres = con.query("""
-    select genre_class, count(genre_class) 
-    from features 
-    group by genre_class 
-    order by count(genre_class) desc
-    """).df()["genre_class"].to_list()
-genres = [""] + genres
 
+### Sidebar
 st.sidebar.title("Choose your Song")
+genres = utils.get_genre_list(con)
 
-# Find Song and ID
+
 try:
-    selected_genre_class = st.sidebar.selectbox("Which genre?", genres)
+    selected_genre = st.sidebar.selectbox("Which genre?", genres)
     query = st.sidebar.text_input("Search for a song or artist", "")
-    songs = utils.lookup_song(con, query, selected_genre_class)
+    songs = utils.lookup_songs(con, query, selected_genre)
     selected_song = st.sidebar.selectbox("Select Song", songs["song_detail"])[:20]
     track_id = songs.query("`song_detail`.str.contains(@selected_song)", engine="python").iloc[0]["id"]
 except:
     track_id = ""
 
 
-# Main
-st.markdown("# Spotify Song Recommender")
 
+### Main
+st.markdown("# Spotify Song Recommender")
 st.markdown("## Song Details")
 st.markdown("Here are the details of the song you selected:")
 st.dataframe(utils.show_song_details(con, track_id))
