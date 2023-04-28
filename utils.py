@@ -237,7 +237,7 @@ def make_recommendations(con: duckdb.DuckDBPyConnection, track_id: str, n_neighb
 
 
 @job
-def main():
+def pipeline():
     step1 = clean_db()
     step2 = load_data_into_db(start=step1)
     step3 = create_genre_table(start=step2)
