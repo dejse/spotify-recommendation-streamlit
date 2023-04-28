@@ -26,13 +26,14 @@ pip install -r dagster_req
 
 ## Run
 
+Make sure to first run the dagster pipeline or the jupyter notebook, before running the streamlit app.
+
 ```sh
-conda activate spotify_env
-streamlit run app.py
-
-
 conda activate spotify_dagster_env
 dagster dev -f utils.py
+
+conda activate spotify_env
+streamlit run app.py
 ```
 
 
