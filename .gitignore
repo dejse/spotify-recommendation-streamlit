@@ -1,4 +1,6 @@
 *.csv
 *.db
 *.db.wal
+*.duckdb
+*.duckdb.wal
 __pycache__

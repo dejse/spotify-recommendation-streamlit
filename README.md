@@ -11,17 +11,12 @@ The knn algorithm is working though I don't find it particularly useful with son
 `streamlit` is easy to get started, but there is too much magic going on, making it hard to use advanced features. Especially two-way binding of a select box was difficult to achieve. 
 
 
-## Installation
-
-Unfortunately due to a version mismatch with `protobuf` and conflicts between `streamlit` and `dagster`, the latter has been isolated in another environment. 
+## Installation 
 
 ```sh
-conda create -n spotify_env python=3.11
+conda create -n spotify_env python=3.10
 conda activate spotify_env
-pip install -r streamlit_req
-
-conda activate spotify_dagster_env python=3.11
-pip install -r dagster_req
+pip install -r requirements.txt
 ```
 
 ## Run
@@ -29,10 +24,9 @@ pip install -r dagster_req
 Make sure to first run the dagster pipeline or the jupyter notebook, before running the streamlit app.
 
 ```sh
-conda activate spotify_dagster_env
-dagster dev -f utils.py
-
 conda activate spotify_env
+
+dagster dev -f pipeline.py
 streamlit run app.py
 ```
 
